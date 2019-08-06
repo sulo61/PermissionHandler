@@ -9,11 +9,10 @@ import io.sulek.permissionhandler.*
 abstract class BaseActivity : AppCompatActivity(), BasePermissionActivity {
 
     private lateinit var permissionHandler: PermissionHandler
-    private lateinit var permissionBundle: PermissionBundle
+    private val permissionBundle = PermissionBundle()
 
-    private val allActivitiesPermissions = mutableListOf(
-            Permission(Manifest.permission.ACCESS_FINE_LOCATION, Scope.ALL_ACTIVITIES)
-    )
+    private val allActivitiesPermissions =
+            mutableListOf(Permission(Manifest.permission.ACCESS_FINE_LOCATION, Scope.ACTIVITY))
     private val allActivitiesScopeRequest = PermissionBundle.ScopeRequest(
             allActivitiesPermissions,
             createAllActivitiesPermissionListener()
@@ -22,13 +21,14 @@ abstract class BaseActivity : AppCompatActivity(), BasePermissionActivity {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionHandler = PermissionHandler()
-        permissionBundle = PermissionBundle(allActivitiesScopeRequest)
+        permissionBundle.allActivitiesScope = allActivitiesScopeRequest
+        setRequestingScope(Scope.ACTIVITY)
     }
 
     override fun onResume() {
         super.onResume()
-        PermissionHandler.onResume {
-            if (getHandlingLifecycleScope() == Scope.ALL_ACTIVITIES) requestCheckPermissions()
+        if (getRequestingScope() == Scope.ACTIVITY) {
+            PermissionHandler.onResume { requestCheckPermissions() }
         }
     }
 
@@ -55,7 +55,11 @@ abstract class BaseActivity : AppCompatActivity(), BasePermissionActivity {
         }
     }
 
-    override fun getHandlingLifecycleScope(): Scope? = permissionBundle.getHandlingLifecycleScope()
+    override fun setRequestingScope(scope: Scope) {
+        permissionBundle.handlingScope = scope
+    }
+
+    override fun getRequestingScope(): Scope? = permissionBundle.handlingScope
 
     override fun requestCheckPermissions() = permissionHandler.requestCheckPermissions(this, permissionBundle)
 

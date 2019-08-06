@@ -14,7 +14,7 @@ class SecondFragment : Fragment() {
 
     private var basePermissionActivity: BasePermissionActivity? = null
     private val singleFragmentPermissions = mutableListOf(
-            Permission(Manifest.permission.RECORD_AUDIO, Scope.SINGLE_ACTIVITY)
+            Permission(Manifest.permission.RECORD_AUDIO, Scope.FRAGMENT)
     )
     private val singleFragmentScopeRequest = PermissionBundle.ScopeRequest(
             singleFragmentPermissions,
@@ -28,17 +28,13 @@ class SecondFragment : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is BasePermissionActivity) basePermissionActivity = context
+        basePermissionActivity?.requestSingleFragmentPermissions(singleFragmentScopeRequest)
     }
 
     override fun onDetach() {
         basePermissionActivity?.clearSingleFragmentPermission()
         basePermissionActivity = null
         super.onDetach()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        basePermissionActivity?.requestSingleFragmentPermissions(singleFragmentScopeRequest)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -48,7 +44,7 @@ class SecondFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         basePermissionActivity?.let {
-            if (it.getHandlingLifecycleScope() == Scope.ALL_ACTIVITIES) it.requestCheckPermissions()
+            if (it.getRequestingScope() == Scope.FRAGMENT) PermissionHandler.onResume { it.requestCheckPermissions() }
         }
     }
 }

@@ -5,6 +5,7 @@ interface BasePermissionActivity {
     fun clearSingleActivityPermission()
     fun requestSingleFragmentPermissions(scopeRequest: PermissionBundle.ScopeRequest)
     fun clearSingleFragmentPermission()
-    fun getHandlingLifecycleScope(): Scope?
+    fun getRequestingScope(): Scope?
+    fun setRequestingScope(scope: Scope)
     fun requestCheckPermissions()
 }
